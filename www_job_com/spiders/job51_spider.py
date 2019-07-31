@@ -1,7 +1,19 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import time
+from urllib.parse import quote
 from www_job_com.items import WwwJobComItem
+
+# 城市为空列表的时候表示全国
+CITY_DICT = {'天津': '050000', '南京': '070200', '惠州': '030300', '重庆': '060000', '石家庄': '160200', '武汉': '180200',
+             '无锡': '070400', '昆明': '250200', '北京': '010000', '宁波': '080300', '大连': '230300', '苏州': '070300',
+             '哈尔滨': '220200', '杭州': '080200', '成都': '090200', '上海': '020000', '合肥': '150200', '广州': '030200',
+             '福州': '110200', '长春': '240200', '沈阳': '230200', '西安': '200200', '济南': '120200', '长沙': '190200',
+             '东莞': '030800', '郑州': '170200', '深圳': '040000'}
+# 职位
+JOBNAME = 'Python'
+# 城市
+CITYS = ['深圳']
 
 
 class Job51Spider(scrapy.Spider):
@@ -61,10 +73,21 @@ class Job51Spider(scrapy.Spider):
     # 发送请求
     def next_request(self):
         self.curPage += 1
-        self.positionUrl = "http://search.51job.com/list/170200,000000,0000,00,9,99,php,2," + str(
-            self.curPage) + ".html"
+
+        base_url = "http://search.51job.com/list/{},000000,0000,00,9,99,{},2,"
+
+        if len(CITYS) == 1:
+            citynum = CITY_DICT[CITYS[0]]
+        elif len(CITYS) > 1:
+            lis = [CITY_DICT[c] for c in CITYS]
+            citynum = ','.join(lis)
+        else:
+            citynum = ''
+
+        the_url = base_url.format(quote(citynum), quote(JOBNAME))
+        self.positionUrl = the_url + str(self.curPage) + ".html"
         print("51job page:" + str(self.curPage))
-        time.sleep(10)
+        time.sleep(1)
         return scrapy.http.FormRequest(self.positionUrl,
                                        headers=self.headers,
                                        callback=self.parse)

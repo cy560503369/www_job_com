@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import time
+import json
 from www_job_com.items import WwwJobComItem
 
 
@@ -10,50 +11,68 @@ class ZhaopinSpider(scrapy.Spider):
     start_urls = ['http://sou.zhaopin.com/']
     positionUrl = ''
     curPage = 0
-    headers = {}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0",
+               "Accept-Encoding": "gzip, deflate, br",
+               "Referer": "https://sou.zhaopin.com/?p=2&jl=%E6%B7%B1%E5%9C%B3&et=2&kw=php&kt=3&sf=0&st=0"}
 
     def start_requests(self):
         return [self.next_request()]
 
     def parse(self, response):
         print("request -> " + response.url)
-        job_list = response.css('table.newlist > tr')
-        if (len(job_list) > 1):
-            print("zhaopin Nums:" + str(len(job_list)))
-            i = 0;
-            for job in job_list:
-                i += 1
-                if (i > 1 and (i % 2) == 0):
-                    item = WwwJobComItem()
-                    item['position_id'] = job.css('td.zwmc > input::attr(data-monitor)').extract_first().strip().replace("|", "")
-                    name = job.css('td.zwmc > div > a').extract_first().strip()
-                    if (name.find("php") > -1 or name.find("Php") > -1 or name.find("PHP") > -1):
-                        item["position_name"] = "php研发工程师"
-                        salary = job.css('td.zwyx::text').extract_first().strip().split("-")
-                        item["salary"] = str(int(int(salary[0]) / 1000)) + "K-" + str(int(int(salary[1]) / 100)) + "K"
-                        item["avg_salary"] = (int(salary[0]) + int(salary[1])) / 2000
-                        item['city'] = "郑州"
-                        item['work_year'] = ""
-                        item['education'] = ""
-                        item['company_name'] = job.css('td.gsmc > a::text').extract_first().strip()
-                        item['industry_field'] = ""
-                        item['finance_stage'] = ""
-                        item['company_size'] = ""
-                        item['position_lables'] = ""
-                        item['time'] = job.css('td.gxsj > span::text').extract_first().strip()
-                        item['updated_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                        item['platform'] = "zhaopin"
-                        yield item
+
+        try:
+            html = json.loads(response.body)
+        except ValueError:
+            print(response.body)
             yield self.next_request()
+
+        if 'data' in html.keys():
+            if 'results' in html['data'].keys():
+                results = html.get('data').get('results')
+                print('zhilian Nums:' + str(len(results)))
+                for result in results:
+                    item = WwwJobComItem()
+                    item['salary'] = result.get('salary').replace("k", "K")
+                    salary = item["salary"].split("-")
+                    if len(salary) > 1:
+                        item["avg_salary"] = (float(salary[0].replace("K", "")) + float(salary[1].replace("K", ""))) / 2
+                    else:
+                        item["avg_salary"] = item["salary"]
+                    item['city'] = result.get('city').get("display")
+                    item['finance_stage'] = ''
+                    item['industry_field'] = ''
+                    item['position_lables'] = result.get('jobType').get('items')[0].get('name')
+                    item['position_id'] = result.get('number')
+                    item['company_size'] = result.get('company').get('size').get('name')
+                    item['position_name'] = result.get('jobName')
+                    item['work_year'] = result.get('workingExp').get('name')
+                    item['education'] = result.get('eduLevel').get('name')
+                    item['company_name'] = result.get('company').get('name')
+                    item['time'] = result.get("updateDate")
+                    item['updated_at'] = time.strftime("%Y-%m-%d %H:%M:%S",
+                                                       time.localtime())
+                    item['platform'] = "zhilianzhaopin"
+                    yield item
+
+                self.curPage = self.curPage + 1
+                if self.curPage <= 10:
+                    yield self.next_request()
 
     # 发送请求
     def next_request(self):
         self.curPage += 1
-        if (self.curPage <= 10):
-            self.positionUrl = "http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E9%83%91%E5%B7%9E&kw=php&sm=0&fl=719&isadv=0&sb=1&isfilter=1&et=2&p=" + str(
-                self.curPage)
+        if self.curPage <= 10:
+            self.positionUrl = "https://fe-api.zhaopin.com/c/i/sou?pageSize=" \
+                               "90&cityId=%E6%B7%B1%E5%9C%B3&workExperience=" \
+                               "-1&education=-1&companyType=-1&employmentTy" \
+                               "pe=2&jobWelfareTag=-1&kw=php&kt=3&_v=0.946" \
+                               "46938&x-zp-page-request-id=b268493d567142a" \
+                               "0ba18a608ad86ff48-1564561458575-864443&x-zp-" \
+                               "client-id=10097453-22d1-4ec6-9ebe-38afe6796" \
+                               "6ad&start=" + str(self.curPage * 90)
             print("zhaopin page:" + str(self.curPage))
-            time.sleep(10)
+            time.sleep(2)
             return scrapy.http.FormRequest(self.positionUrl,
                                            headers=self.headers,
                                            callback=self.parse)

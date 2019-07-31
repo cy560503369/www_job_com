@@ -90,9 +90,10 @@ ITEM_PIPELINES = {
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # Mysql数据库的配置信息
-MYSQL_HOST = 'dev.gammainfo.com'
-MYSQL_DBNAME = 'job'  # 数据库名字
+MYSQL_HOST = '39.106.157.63'
+MYSQL_DBNAME = 'mysql'  # 数据库名字
 MYSQL_USER = 'root'  # 数据库账号
-MYSQL_PASSWD = 'Gamma0903'  # 数据库密码
+MYSQL_PASSWD = '151990519'  # 数据库密码
 
 MYSQL_PORT = 3306  # 数据库端口
+
