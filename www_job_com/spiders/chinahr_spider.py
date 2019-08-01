@@ -38,9 +38,11 @@ class ZhipinSpider(scrapy.Spider):
                 item['position_id'] = job.css('li.l1 > span.e1 > a::attr(href)').extract_first().strip().replace(
                     ".html?searchplace=" + CITY_DICT[CITY], "").replace("http://www.chinahr.com/job/", "")
                 item["position_name"] = job.css('li.l1 > span.e1 > a::text').extract_first().strip()
-                salary = job.css('li.l2 > span.e2::text').extract_first().strip().split("-")
-                item["salary"] = str(int(int(salary[0]) / 1000)) + "K-" + str(int(int(salary[1]) / 1000)) + "K"
-                item["avg_salary"] = (int(salary[0]) + int(salary[1])) / 2000
+                item["salary"] = job.css('li.l2 > span.e2::text').extract_first().strip()
+                item["avg_salary"] = ''
+                # salary = job.css('li.l2 > span.e2::text').extract_first().strip().split("-")
+                # item["salary"] = str(int(int(salary[0]) / 1000)) + "K-" + str(int(int(salary[1]) / 1000)) + "K"
+                # item["avg_salary"] = (int(salary[0]) + int(salary[1])) / 2000
                 info_primary = job.css('li.l2 > span.e1::text').extract_first().strip().split("/")
                 item['city'] = info_primary[0] + info_primary[1]
                 item['work_year'] = info_primary[2].replace("]\r\n\t\t\t\t\t\t\t", "")
@@ -61,11 +63,12 @@ class ZhipinSpider(scrapy.Spider):
     # 发送请求
     def next_request(self):
         self.curPage += 1
-        self.positionUrl = "http://www.chinahr.com/sou/?orderField=relate&" \
-                           "keyword={}&city={}&page=".format(JOB_NAME, CITY_DICT[CITY]) + str(self.curPage)
-        print("chinahr page:" + str(self.curPage))
-        time.sleep(10)
-        return scrapy.http.FormRequest(
-            self.positionUrl,
-            headers=self.headers,
-            callback=self.parse)
+        if self.curPage <= 20:
+            self.positionUrl = "http://www.chinahr.com/sou/?orderField=relate&" \
+                               "keyword={}&city={}&page=".format(JOB_NAME, CITY_DICT[CITY]) + str(self.curPage)
+            print("chinahr page:" + str(self.curPage))
+            time.sleep(5)
+            return scrapy.http.FormRequest(
+                self.positionUrl,
+                headers=self.headers,
+                callback=self.parse)

@@ -34,11 +34,12 @@ class ZhaopinSpider(scrapy.Spider):
                 for result in results:
                     item = WwwJobComItem()
                     item['salary'] = result.get('salary').replace("k", "K")
-                    salary = item["salary"].split("-")
-                    if len(salary) > 1:
-                        item["avg_salary"] = (float(salary[0].replace("K", "")) + float(salary[1].replace("K", ""))) / 2
-                    else:
-                        item["avg_salary"] = item["salary"]
+                    item["avg_salary"] = ''
+                    # salary = item["salary"].split("-")
+                    # if len(salary) > 1:
+                    #     item["avg_salary"] = (float(salary[0].replace("K", "")) + float(salary[1].replace("K", ""))) / 2
+                    # else:
+                    #     item["avg_salary"] = item["salary"]
                     item['city'] = result.get('city').get("display")
                     item['finance_stage'] = ''
                     item['industry_field'] = ''

@@ -40,21 +40,23 @@ class Job51Spider(scrapy.Spider):
                 else:
                     item['position_id'] = job.css('p.t1 > input::attr(value)').extract_first().strip()
                     item["position_name"] = job.css('p.t1 > span > a::text').extract_first().strip()
-                    salary = job.css('span.t4::text').extract_first().strip()
-                    if (salary.find("万/月") > -1):
-                        salary = salary.replace("万/月", "").split("-")
-                        item["salary"] = str(float(salary[0]) * 10) + "K-" + str(float(salary[1]) * 10) + "K"
-                        item["avg_salary"] = (float(salary[0]) * 10 + float(salary[1]) * 10) / 2
-                    elif (salary.find("万/年") > -1):
-                        salary = salary.replace("万/年", "").split("-")
-                        item["salary"] = str(float(salary[0]) / 12) + "K-" + str(float(salary[1]) / 12) + "K"
-                        item["avg_salary"] = (float(salary[0]) / 12 + float(salary[1]) / 12) / 2
-                    elif (salary.find("元/天") > -1):
-                        continue
-                    else:
-                        salary = salary.replace("千/月", "").split("-")
-                        item["salary"] = salary[0] + "K-" + salary[1] + "K"
-                        item["avg_salary"] = (float(salary[0]) + float(salary[1])) / 2
+                    item["salary"] = job.css('span.t4::text').extract_first().strip()
+                    item["avg_salary"] = ''
+                    # salary = job.css('span.t4::text').extract_first().strip()
+                    # if (salary.find("万/月") > -1):
+                    #     salary = salary.replace("万/月", "").split("-")
+                    #     item["salary"] = str(float(salary[0]) * 10) + "K-" + str(float(salary[1]) * 10) + "K"
+                    #     item["avg_salary"] = (float(salary[0]) * 10 + float(salary[1]) * 10) / 2
+                    # elif (salary.find("万/年") > -1):
+                    #     salary = salary.replace("万/年", "").split("-")
+                    #     item["salary"] = str(float(salary[0]) / 12) + "K-" + str(float(salary[1]) / 12) + "K"
+                    #     item["avg_salary"] = (float(salary[0]) / 12 + float(salary[1]) / 12) / 2
+                    # elif (salary.find("元/天") > -1):
+                    #     continue
+                    # else:
+                    #     salary = salary.replace("千/月", "").split("-")
+                    #     item["salary"] = salary[0] + "K-" + salary[1] + "K"
+                    #     item["avg_salary"] = (float(salary[0]) + float(salary[1])) / 2
                     item['city'] = job.css('span.t3::text').extract_first().strip()
                     item['work_year'] = ""
                     item['education'] = ""
@@ -73,21 +75,21 @@ class Job51Spider(scrapy.Spider):
     # 发送请求
     def next_request(self):
         self.curPage += 1
+        if self.curPage < 20:
+            base_url = "http://search.51job.com/list/{},000000,0000,00,9,99,{},2,"
 
-        base_url = "http://search.51job.com/list/{},000000,0000,00,9,99,{},2,"
+            if len(CITYS) == 1:
+                citynum = CITY_DICT[CITYS[0]]
+            elif len(CITYS) > 1:
+                lis = [CITY_DICT[c] for c in CITYS]
+                citynum = ','.join(lis)
+            else:
+                citynum = ''
 
-        if len(CITYS) == 1:
-            citynum = CITY_DICT[CITYS[0]]
-        elif len(CITYS) > 1:
-            lis = [CITY_DICT[c] for c in CITYS]
-            citynum = ','.join(lis)
-        else:
-            citynum = ''
-
-        the_url = base_url.format(quote(citynum), quote(JOBNAME))
-        self.positionUrl = the_url + str(self.curPage) + ".html"
-        print("51job page:" + str(self.curPage))
-        time.sleep(1)
-        return scrapy.http.FormRequest(self.positionUrl,
-                                       headers=self.headers,
-                                       callback=self.parse)
+            the_url = base_url.format(quote(citynum), quote(JOBNAME))
+            self.positionUrl = the_url + str(self.curPage) + ".html"
+            print("51job page:" + str(self.curPage))
+            time.sleep(1)
+            return scrapy.http.FormRequest(self.positionUrl,
+                                           headers=self.headers,
+                                           callback=self.parse)
