@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import time
+from www_job_com import settings
 from www_job_com.items import WwwJobComItem
 
 CITY_DICT = {'天津': '101030100', '南京': '', '惠州': '',
@@ -12,8 +13,9 @@ CITY_DICT = {'天津': '101030100', '南京': '', '惠州': '',
              '福州': '', '长春': '', '沈阳': '',
              '西安': '', '济南': '', '长沙': '',
              '东莞': '', '郑州': '', '深圳': '101280600'}
-CITY = '深圳'
-JOB_NAME = 'python'
+CITY = settings.CITY
+JOB_NAME = settings.JOB_NAME
+
 
 class ZhipinSpider(scrapy.Spider):
     name = 'zhipin'
@@ -37,7 +39,7 @@ class ZhipinSpider(scrapy.Spider):
                 job_primary = job.css('div.job-primary')
                 item['position_id'] = job.css('div.info-primary > h3 > a::attr(data-jobid)').extract_first().strip()
                 item["position_name"] = job_primary.css('div.info-primary > h3 > a > div::text').extract_first().strip()
-                item["salary"] = job_primary.css('div.info-primary > h3 > a > span::text').extract_first().strip()
+                item["salary"] = job_primary.css('div.info-primary > h3 > a > span::text').extract_first()
                 item["avg_salary"] = ''
                 # if '·' in item["salary"]:
                 #     salary_year = float(item["salary"].split("·")[1].replace("薪", ""))

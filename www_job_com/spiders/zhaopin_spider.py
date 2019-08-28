@@ -2,6 +2,7 @@
 import scrapy
 import time
 import json
+from www_job_com import settings
 from www_job_com.items import WwwJobComItem
 
 
@@ -12,8 +13,8 @@ class ZhaopinSpider(scrapy.Spider):
     positionUrl = ''
     curPage = 0
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0",
-               "Accept-Encoding": "gzip, deflate, br",
-               "Referer": "https://sou.zhaopin.com/?p=2&jl=%E6%B7%B1%E5%9C%B3&et=2&kw=php&kt=3&sf=0&st=0"}
+               "Accept-Encoding": "gzip, deflate, br"}
+                # "Referer": "https://sou.zhaopin.com/?p=2&jl=%E6%B7%B1%E5%9C%B3&et=2&kw=php&kt=3&sf=0&st=0"
 
     def start_requests(self):
         return [self.next_request()]
@@ -56,22 +57,22 @@ class ZhaopinSpider(scrapy.Spider):
                     item['platform'] = "zhilianzhaopin"
                     yield item
 
-                self.curPage = self.curPage + 1
-                if self.curPage <= 10:
-                    yield self.next_request()
+                yield self.next_request()
 
     # 发送请求
     def next_request(self):
         self.curPage += 1
         if self.curPage <= 10:
             self.positionUrl = "https://fe-api.zhaopin.com/c/i/sou?pageSize=" \
-                               "90&cityId=%E6%B7%B1%E5%9C%B3&workExperience=" \
+                               "90&cityId={}&workExperience=" \
                                "-1&education=-1&companyType=-1&employmentTy" \
-                               "pe=2&jobWelfareTag=-1&kw=php&kt=3&_v=0.946" \
+                               "pe=2&jobWelfareTag=-1&kw={}&kt=3&_v=0.946" \
                                "46938&x-zp-page-request-id=b268493d567142a" \
                                "0ba18a608ad86ff48-1564561458575-864443&x-zp-" \
                                "client-id=10097453-22d1-4ec6-9ebe-38afe6796" \
-                               "6ad&start=" + str(self.curPage * 90)
+                               "6ad&start=".format(settings.CITY,
+                                                   settings.JOB_NAME)
+            self.positionUrl += str((self.curPage - 1) * 90)
             print("zhaopin page:" + str(self.curPage))
             time.sleep(2)
             return scrapy.http.FormRequest(self.positionUrl,

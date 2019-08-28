@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import time
+from www_job_com import settings
 from www_job_com.items import WwwJobComItem
 
 CITY_DICT = {'天津': '35,399', '南京': '16,169', '惠州': '25,301',
@@ -13,8 +14,8 @@ CITY_DICT = {'天津': '35,399', '南京': '16,169', '惠州': '25,301',
              '西安': '30,358', '济南': '21,230', '长沙': '24,277',
              '东莞': '25,307', '郑州': '22,247', '深圳': '25,292'}
 
-CITY = '深圳'
-JOB_NAME = 'python'
+CITY = settings.CITY
+JOB_NAME = settings.JOB_NAME
 
 
 class ZhipinSpider(scrapy.Spider):
@@ -38,7 +39,7 @@ class ZhipinSpider(scrapy.Spider):
                 item['position_id'] = job.css('li.l1 > span.e1 > a::attr(href)').extract_first().strip().replace(
                     ".html?searchplace=" + CITY_DICT[CITY], "").replace("http://www.chinahr.com/job/", "")
                 item["position_name"] = job.css('li.l1 > span.e1 > a::text').extract_first().strip()
-                item["salary"] = job.css('li.l2 > span.e2::text').extract_first().strip()
+                item["salary"] = job.css('li.l2 > span.e2::text').extract_first()
                 item["avg_salary"] = ''
                 # salary = job.css('li.l2 > span.e2::text').extract_first().strip().split("-")
                 # item["salary"] = str(int(int(salary[0]) / 1000)) + "K-" + str(int(int(salary[1]) / 1000)) + "K"

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import time
+from www_job_com import settings
 from urllib.parse import quote
 from www_job_com.items import WwwJobComItem
 
@@ -11,9 +12,9 @@ CITY_DICT = {'天津': '050000', '南京': '070200', '惠州': '030300', '重庆
              '福州': '110200', '长春': '240200', '沈阳': '230200', '西安': '200200', '济南': '120200', '长沙': '190200',
              '东莞': '030800', '郑州': '170200', '深圳': '040000'}
 # 职位
-JOBNAME = 'Python'
+JOBNAME = settings.JOB_NAME
 # 城市
-CITYS = ['深圳']
+CITYS = [settings.CITY]
 
 
 class Job51Spider(scrapy.Spider):
@@ -40,7 +41,7 @@ class Job51Spider(scrapy.Spider):
                 else:
                     item['position_id'] = job.css('p.t1 > input::attr(value)').extract_first().strip()
                     item["position_name"] = job.css('p.t1 > span > a::text').extract_first().strip()
-                    item["salary"] = job.css('span.t4::text').extract_first().strip()
+                    item["salary"] = job.css('span.t4::text').extract_first()
                     item["avg_salary"] = ''
                     # salary = job.css('span.t4::text').extract_first().strip()
                     # if (salary.find("万/月") > -1):

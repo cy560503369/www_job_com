@@ -6,6 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.http import HtmlResponse
 
 
 class WwwJobComSpiderMiddleware(object):
@@ -101,3 +102,18 @@ class WwwJobComDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+# 定义selenium中间件
+class SeleniumMiddleware(object):
+    def process_request(self, request, spider):
+        if spider.name == 'lagou':
+            print("reqeset----" + request.url)
+            if spider.curPage == 1:
+                spider.brower.get(request.url)
+            else:
+                btn = spider.brower.find_element_by_class_name("next")
+                print(btn)
+                btn.click()
+            return HtmlResponse(url=request.url, body=spider.brower.page_source,
+                                request=request, encoding='utf-8')

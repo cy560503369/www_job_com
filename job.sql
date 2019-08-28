@@ -20,6 +20,6 @@ CREATE TABLE `jobs` (
   `updated_at` varchar(255) DEFAULT '',
   `time` varchar(255) DEFAULT '',
   `platform` varchar(255) DEFAULT '',
-  `avg_salary` float(6,3) DEFAULT '0.000',
+  `avg_salary` varchar(255) DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=9623 DEFAULT CHARSET=utf8;

@@ -19,7 +19,7 @@ COMMANDS_MODULE = 'www_job_com.commands'
 # USER_AGENT = 'www_job_com (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -52,7 +52,9 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
+DOWNLOADER_MIDDLEWARES = {
+    'www_job_com.middlewares.SeleniumMiddleware': 543
+}
 #    'www_job_com.middlewares.WwwJobComDownloaderMiddleware': 543,
 # }
 
@@ -97,3 +99,5 @@ MYSQL_PASSWD = '151990519'  # 数据库密码
 
 MYSQL_PORT = 3306  # 数据库端口
 
+JOB_NAME = 'python'
+CITY = '深圳'
