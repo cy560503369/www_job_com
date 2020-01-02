@@ -99,5 +99,5 @@ MYSQL_PASSWD = '151990519'  # 数据库密码
 
 MYSQL_PORT = 3306  # 数据库端口
 
-JOB_NAME = 'python'
+JOB_NAME = 'linux'
 CITY = '深圳'

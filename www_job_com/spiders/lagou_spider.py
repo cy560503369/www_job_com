@@ -62,6 +62,6 @@ class LaGouSpider(scrapy.Spider):
 
         self.totalPage = response.xpath('//div[@class="page-number"]/span[@class="span totalNum"]/text()').extract()[0]
         self.curPage += 1
-        if self.curPage <= self.totalPage:
+        if int(self.curPage) <= int(self.totalPage):
             print('next')
             yield scrapy.Request(url=self.url, callback=self.parse, dont_filter=True)
